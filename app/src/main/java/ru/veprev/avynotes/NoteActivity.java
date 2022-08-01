@@ -11,9 +11,10 @@ public class NoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.note_main);
 
+        if (savedInstanceState == null)
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.title_container, new NoteFragment())
+                .add(R.id.title_container, new NoteFragment())
                 .commit();
     }
 }

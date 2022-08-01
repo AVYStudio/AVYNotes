@@ -1,6 +1,6 @@
 package ru.veprev.avynotes;
 
-import static ru.veprev.avynotes.NoteDescriptionFragment.INDEX;
+import static ru.veprev.avynotes.NotesStructure.listOfNotes;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -16,19 +16,19 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 
 public class NoteFragment extends Fragment {
 
-    private static final String CURRENT_NOTE = "currentNote";
-    private int currentIndex;
-
-
-    public NoteFragment() {
-        // Required empty public constructor
-    }
+    static final String CURRENT_NOTE = "currentNote";
+    private FloatingActionButton addBtn;
+    private int lastIndex;
+    NotesStructure note;
+    View container;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +38,6 @@ public class NoteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_note, container, false);
     }
 
@@ -47,44 +46,65 @@ public class NoteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (savedInstanceState != null) {
-            currentIndex = savedInstanceState.getInt(CURRENT_NOTE, currentIndex);
-        }
+        if (savedInstanceState != null)
+            note = savedInstanceState.getParcelable(CURRENT_NOTE);
+
+        container = view.findViewById(R.id.data_container);
+        initNote(container);
 
         if (isLandscape()) {
-            showLandNote(currentIndex);
+            showLandNote(note);
         }
 
-        initNote(view);
 
+        listOfNotes = new ArrayList<>();
+        Collections.addAll(listOfNotes, NotesStructure.getNotes());
+
+        addBtn = view.findViewById(R.id.btnAdd);
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listOfNotes.add(NotesStructure.getNote(lastIndex));
+                initNote();
+            }
+        });
+    }
+
+    public void initNote() {
+        initNote(container);
     }
 
     private void initNote(View view) {
         LinearLayout layout = (LinearLayout) view;
+        layout.removeAllViews();
 
         for (int i = 0; i < NotesStructure.getNotes().length; i++) {
             TextView tv = new TextView(getContext());
             tv.setText(NotesStructure.getNotes()[i].getName());
-            layout.addView(tv);
             tv.setTextSize(30);
+            layout.addView(tv);
+
             final int index = i;
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    currentIndex = index;
-                    showNote(index);
-                }
+            lastIndex = i;
+            tv.setOnClickListener(view1 -> {
+                showNote(NotesStructure.getNotes()[index]);
             });
         }
     }
 
-    private void showNote(int index) {
-        if (isLandscape()) showLandNote(index);
-        else showPortNote(index);
+//    private void showNote(int index) {
+//        if (isLandscape()) showLandNote(index);
+//        else showPortNote(index);
+//    }
+
+    private void showNote(NotesStructure note) {
+        this.note = note;
+        if (isLandscape()) showLandNote(note);
+        else showPortNote(note);
     }
 
-    private void showPortNote(int index) {
-        NoteDescriptionFragment fragment = NoteDescriptionFragment.newInstance(index);
+    private void showPortNote(NotesStructure note) {
+        NoteDescriptionFragment fragment = NoteDescriptionFragment.newInstance(note);
         requireActivity()
                 .getSupportFragmentManager()
                 .beginTransaction()
@@ -92,11 +112,10 @@ public class NoteFragment extends Fragment {
                 .addToBackStack("")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
-
     }
 
-    private void showLandNote(int index) {
-        NoteDescriptionFragment fragment = NoteDescriptionFragment.newInstance(index);
+    private void showLandNote(NotesStructure note) {
+        NoteDescriptionFragment fragment = NoteDescriptionFragment.newInstance(note);
         requireActivity()
                 .getSupportFragmentManager()
                 .beginTransaction()
@@ -106,12 +125,14 @@ public class NoteFragment extends Fragment {
     }
 
     private boolean isLandscape() {
-        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        return getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putParcelable(CURRENT_NOTE, note);
         super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_NOTE, currentIndex);
+
     }
 }
