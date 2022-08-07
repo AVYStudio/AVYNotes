@@ -2,4 +2,16 @@
     <string name="app_name">AVYNotes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="about">About this app</string>
+    <string name="exit">Exit</string>
+    <string name="settings">Settings</string>
+    <string name="header">Приложение \"Мои Заметки\"</string>
+    <string name="tm">Все права защищены (с) AVYStudio</string>
+    <string name="type_1">Шрифт 1</string>
+    <string name="type_2">Шрифт 2</string>
+    <string name="type_3">Шрифт 3</string>
+    <string name="delete_item">Delete</string>
+    <string name="menu">Main menu</string>
+    <string name="image">Image</string>
+    <string name="back">Back</string>
 </resources>

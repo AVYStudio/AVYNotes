@@ -1,7 +1,5 @@
 package ru.veprev.avynotes;
 
-import static ru.veprev.avynotes.NotesStructure.listOfNotes;
-
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -14,12 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.Collections;
 
 
 public class NoteFragment extends Fragment {
@@ -56,15 +53,11 @@ public class NoteFragment extends Fragment {
             showLandNote(note);
         }
 
-
-        listOfNotes = new ArrayList<>();
-        Collections.addAll(listOfNotes, NotesStructure.getNotes());
-
         addBtn = view.findViewById(R.id.btnAdd);
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listOfNotes.add(NotesStructure.getNote(lastIndex));
+                NotesStructure.getNotes().add(NotesStructure.getNote(lastIndex + 1));
                 initNote();
             }
         });
@@ -78,16 +71,17 @@ public class NoteFragment extends Fragment {
         LinearLayout layout = (LinearLayout) view;
         layout.removeAllViews();
 
-        for (int i = 0; i < NotesStructure.getNotes().length; i++) {
+        for (int i = 0; i < NotesStructure.getNotes().size(); i++) {
             TextView tv = new TextView(getContext());
-            tv.setText(NotesStructure.getNotes()[i].getName());
+            tv.setText(NotesStructure.getNotes().get(i).getName());
             tv.setTextSize(30);
             layout.addView(tv);
 
             final int index = i;
+            initPopupMenu(layout, tv, index);
             lastIndex = i;
             tv.setOnClickListener(view1 -> {
-                showNote(NotesStructure.getNotes()[index]);
+                showNote(NotesStructure.getNotes().get(index));
             });
         }
     }
@@ -131,8 +125,29 @@ public class NoteFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+
+        if (note == null)
+            note = NotesStructure.getNotes().get(0);
+
         outState.putParcelable(CURRENT_NOTE, note);
         super.onSaveInstanceState(outState);
+    }
 
+    private void initPopupMenu(LinearLayout rootView, TextView view, int index){
+        view.setOnLongClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(requireActivity(), view);
+            requireActivity().getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+                switch (menuItem.getItemId()){
+                    case R.id.action_popup_delete:
+                        NotesStructure.getNotes().remove(index);
+                        rootView.removeView(view);
+                        break;
+                }
+                return true;
+            });
+            popupMenu.show();
+            return true;
+        });
     }
 }

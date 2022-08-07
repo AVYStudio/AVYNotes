@@ -12,8 +12,7 @@ import java.util.Random;
 public class NotesStructure implements Parcelable {
 
     private static final Random random = new Random();
-    private static NotesStructure[] notes;
-    static ArrayList<NotesStructure> listOfNotes;
+    private static ArrayList<NotesStructure> notes;
     private static int counter;
 
     private int id;
@@ -70,23 +69,18 @@ public class NotesStructure implements Parcelable {
         return date;
     }
 
-    public static NotesStructure[] getNotes(){
+    public static ArrayList<NotesStructure> getNotes(){
         return notes;
     }
-
-    public static ArrayList<NotesStructure> getAllNotes(){
-        return listOfNotes;
-    }
-
 
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
     static {
-        notes = new NotesStructure[10];
-        for (int i = 0; i < notes.length; i++) {
-            notes[i] = NotesStructure.getNote(i);
+        notes = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            notes.add(NotesStructure.getNote(i));
         }
     }
 
